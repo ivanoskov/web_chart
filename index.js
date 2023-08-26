@@ -2,36 +2,65 @@ class LineChart {
   constructor(drawElement, data) {
     this.drawElement = drawElement;
     this.data = data;
-    this.linesNum = 5;
-    this.lineWidth = 1;
+    this.barNum = 5;
+    this.barWidth = 1;
+    this.marginOffcet = 20;
     this.createCanvas();
     this.draw();
-}
+  }
   createCanvas() {
     var canvas = document.createElement("canvas");
     canvas.id = "LineChart";
-    canvas.width = this.drawElement.offsetWidth;
-    canvas.height = this.drawElement.offsetHeight;
+    this.width = this.drawElement.offsetWidth - this.marginOffcet * 2;
+    this.height = this.drawElement.offsetHeight - this.marginOffcet * 2;
+    canvas.style.width = this.width + "px";
+    canvas.style.height = this.height + "px";
+    canvas.style.margin = this.marginOffcet + "px";
+    var scale = window.devicePixelRatio; // Change to 1 on retina screens to see blurry canvas.
+    canvas.width = this.width * scale;
+    canvas.height = this.height * scale;
     this.drawElement.appendChild(canvas);
     var ctx = canvas.getContext("2d");
+    ctx.scale(scale, scale);
     this.canvas = canvas;
     this.ctx = ctx;
   }
-  draw(){
-    
-    // draw lines
-    var lineDistance = this.getLineDistance(this.data);
-    console.log(lineDistance);
-    for (var i = 0; i < this.linesNum; i++){
-        this.ctx.fillRect(0, this.canvas.height - (i * lineDistance) - this.lineWidth, this.canvas.width, this.lineWidth);
-    }
-  }
-  getLineDistance(data){
+  draw() {
     var maxElement = Math.max(...this.data);
     var minElement = Math.min(...this.data);
-    console.log(minElement);
     var topOfChart = maxElement * 1.1;
     var bottomOfChar = minElement;
-    return (topOfChart  / this.linesNum) * (this.canvas.height / topOfChart);
+    // draw bars
+    var barDistance = (topOfChart / this.barNum).toFixed(2);
+    var scaleBarDistanceOnCanvas = (
+      barDistance *
+      (this.canvas.height / topOfChart)
+    ).toFixed(2);
+    for (var i = 0; i < this.barNum; i++) {
+      console.log((minElement + i * barDistance).toFixed(2));
+      this.ctx.beginPath();
+      this.ctx.moveTo(
+        28,
+        this.canvas.height - (i * scaleBarDistanceOnCanvas) - this.barWidth - 4
+      );
+      this.ctx.lineTo(
+        this.canvas.width,
+        this.canvas.height - (i * scaleBarDistanceOnCanvas) - this.barWidth - 4
+      );
+      this.ctx.strokeStyle = "#d3d3d3";
+      this.ctx.stroke();
+
+      this.ctx.fillStyle = "#333";
+      this.ctx.strokeStyle = "#000";
+      this.ctx.font = "italic 8pt Arial";
+      this.ctx.fillText(
+        (minElement + i * barDistance).toFixed(2).toString(),
+        0,
+        this.canvas.height - i * scaleBarDistanceOnCanvas - this.barWidth 
+      );
+    }
   }
+  // getLineDistance(data) {
+  //   return (topOfChart / this.barNum) * (this.canvas.height / topOfChart);
+  // }
 }
